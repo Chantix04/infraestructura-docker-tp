@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  # nombre del servicio
+  database:
+    # Imagen a utilizar
+    image: mariadb:latest
+
+    #nombre del contenedor
+    container_name: my-mariadb-database
+
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: tienda
+
+    # mapeo de puertos
+    # el de la derecha es el que usa el SO del servicio
+    # el de la izquierda es el que usa el windows localmente
+    ports:
+      - 8080:8080
+    
+    volumes: 
+      - ./docker-back/dbdata/mariadb1:/var/lib/mariadb1
+  servidor: 
+    # nombre del contenedor
+    container_name: express-server
+    
+    build:
+      # contexto = carpeta donde se encuentra el codigo
+      context: ./docker-back
+
+      # ubicar el dockerfile
+      dockerfile: Dockerfile
+
+    environment:
+      PORT: 4000
+      DATABASE_HOST: database
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: tienda
+    
+    # el contenedor no se iniciará hasta que se inicie la imagen de la BD
+    depends_on:
+      - database
+    # mapeo de puertos
+    ports: 
+      - 4000:4000
+    
+    volumes: 
+      - ./docker-back:/app
